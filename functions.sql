@@ -2,8 +2,11 @@ USE GD1C2018;
 GO
 CREATE PROCEDURE MATOTA.loginUsuario(@username varchar(10), @password varchar(20)) AS
 BEGIN
-	DECLARE @pwd CHAR(64);
-	SELECT @pwd = password FROM MATOTA.Usuario WHERE username = @username;
+	DECLARE @pwd CHAR(64), @enabled BIT;
+	SELECT @pwd = password, @enabled = habilitado FROM MATOTA.Usuario WHERE username = @username;
+
+	IF(@enabled = 0)
+		RETURN -1;
 
 	IF(@pwd = (SELECT CONVERT(NVARCHAR(64),HashBytes('SHA2_256', @password),2)) )
 		BEGIN
@@ -23,6 +26,6 @@ BEGIN
 			DECLARE @intentos SMALLINT, @usuario INT;
 			SELECT TOP 1 @intentos = intentosPassword, @usuario = idUsuario FROM inserted;-- El top 1 es porque si alguien nos tira un update desde afuera explota todo (update de muchas filas).
 			IF( @intentos = 3) 
-				UPDATE MATOTA.Usuario SET habilitado = 0 WHERE idUsuario = @usuario
+				UPDATE MATOTA.Usuario SET habilitado = 0, intentosPassword = 0 WHERE idUsuario = @usuario
 		END
 END
