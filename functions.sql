@@ -62,10 +62,10 @@ CREATE PROCEDURE MATOTA.altaCliente(@nombre nvarchar(255),@apellido nvarchar(255
 									@localidad nvarchar(255),@pais nvarchar(60),@nacionalidad nvarchar(255),@fechaNacimiento datetime)
 AS
 BEGIN
-	--IF EXISTS (SELECT idTipoDocumento,numeroDocumento FROM MATOTA.Cliente WHERE idTipoDocumento = @tipoDoc AND numeroDocumento = @numeroDocumento)
-		--RETURN -1;
-	--IF EXISTS (SELECT mail FROM MATOTA.Cliente WHERE mail = @mail)
-		--RETURN 0;
+	IF EXISTS (SELECT idTipoDocumento,numeroDocumento FROM MATOTA.Cliente WHERE idTipoDocumento = @tipoDoc AND numeroDocumento = @numeroDocumento)
+		RETURN -1;
+	IF EXISTS (SELECT mail FROM MATOTA.Cliente WHERE mail = @mail)
+		RETURN 0;
 	INSERT INTO MATOTA.Cliente VALUES (@nombre,@apellido,@tipoDoc,@numeroDocumento,@mail,@telefono,@calle,@nroCalle,
 									   @piso,@departamento,@localidad,@pais,@nacionalidad,@fechaNacimiento,1,1)
 	RETURN 1;
