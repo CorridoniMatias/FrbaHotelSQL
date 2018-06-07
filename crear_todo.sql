@@ -119,7 +119,7 @@ CREATE TABLE MATOTA.Rol
 (
 	idRol INT NOT NULL PRIMARY KEY IDENTITY(1,1),
 	NOMBRE NVARCHAR(20) NOT NULL,
-estado BIT NOT NULL,   
+	estado BIT NOT NULL,   
 ); 
 
 INSERT INTO MATOTA.Rol VALUES ('Administrador',1),('Recepcionista',1),('Guest',1)
