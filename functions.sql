@@ -2,8 +2,8 @@ USE GD1C2018;
 GO
 CREATE PROCEDURE MATOTA.loginUsuario(@username varchar(10), @password varchar(20)) AS
 BEGIN
-	DECLARE @pwd CHAR(64), @enabled BIT;
-	SELECT @pwd = password, @enabled = habilitado FROM MATOTA.Usuario WHERE username = @username;
+	DECLARE @pwd CHAR(64), @enabled BIT, @userid INT;
+	SELECT @pwd = password, @enabled = habilitado, @userid = idUsuario FROM MATOTA.Usuario WHERE username = @username;
 
 	IF(@enabled = 0)
 		RETURN -1;
@@ -11,7 +11,7 @@ BEGIN
 	IF(@pwd = (SELECT CONVERT(NVARCHAR(64),HashBytes('SHA2_256', @password),2)) )
 		BEGIN
 			UPDATE MATOTA.Usuario SET intentosPassword = 0 WHERE username = @username;
-			RETURN 1;
+			RETURN @userid;
 		END
 
 	UPDATE MATOTA.Usuario SET intentosPassword += 1 WHERE username = @username;
