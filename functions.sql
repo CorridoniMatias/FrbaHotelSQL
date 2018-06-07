@@ -10,11 +10,11 @@ BEGIN
 
 	IF(@pwd = (SELECT CONVERT(NVARCHAR(64),HashBytes('SHA2_256', @password),2)) )
 		BEGIN
-			UPDATE MATOTA.Usuario SET intentosPassword = 0;
+			UPDATE MATOTA.Usuario SET intentosPassword = 0 WHERE username = @username;
 			RETURN 1;
 		END
 
-	UPDATE MATOTA.Usuario SET intentosPassword += 1;
+	UPDATE MATOTA.Usuario SET intentosPassword += 1 WHERE username = @username;
 	RETURN 0;
 END
 GO
