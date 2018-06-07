@@ -71,3 +71,9 @@ BEGIN
 	RETURN 1;
 END
 GO
+CREATE PROCEDURE MATOTA.UpdatePassword(@userid INT, @password VARCHAR(20)) AS
+BEGIN
+	UPDATE MATOTA.Usuario SET password = (SELECT CONVERT(NVARCHAR(64),HashBytes('SHA2_256', @password),2)) WHERE idUsuario = @userid;
+	RETURN @@ROWCOUNT;
+END
+GO
