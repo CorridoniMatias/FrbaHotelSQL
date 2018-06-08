@@ -496,3 +496,5 @@ LEFT JOIN MATOTA.ConsumiblesEstadia ce ON (ce.idReservaHabitacion = rh.idReserva
 WHERE Factura_Nro IS NOT NULL 
 
 commit tran migracion
+
+execute Matota.agregarNombresHotel
