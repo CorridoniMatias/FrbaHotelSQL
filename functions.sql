@@ -134,7 +134,7 @@ BEGIN
 				WHEN idHotel = 12 THEN 'TGC'
 				WHEN idHotel = 13 THEN 'Inolvidable'
 				WHEN idHotel = 14 THEN 'PdP'
-				WHEN idHotel = 15 THEN 'panchocho'
+				WHEN idHotel = 15 THEN 'Panchocho'
 	END
 END
 GO
