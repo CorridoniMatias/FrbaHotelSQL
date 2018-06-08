@@ -64,7 +64,7 @@ nroCalle		NUMERIC(18,0),
 ciudad			NVARCHAR(255),
 pais			NVARCHAR(60),
 cantidadEstrellas	NUMERIC(18,0),
-fechaCreacion		NUMERIC(18,0),
+fechaCreacion		DATE,
 recargaEstrellas	NUMERIC(18,0)
 ); 
 
