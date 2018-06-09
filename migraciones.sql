@@ -119,12 +119,12 @@ ORDER BY Cliente_Pasaporte_Nro
 DECLARE @ESTADORESERVA INT = (SELECT idEstadoReserva FROM MATOTA.EstadoReserva WHERE descripcion = 'Reserva Migrada')
 
 SET IDENTITY_INSERT MATOTA.Reserva ON
-INSERT INTO MATOTA.Reserva (idReserva, fechaDesde, cantidadNoches, idRegimen, idEstadoReserva, idCliente, precioBaseReserva)
-SELECT DISTINCT Reserva_Codigo, Reserva_Fecha_Inicio, Reserva_Cant_Noches, re.idRegimen, @ESTADORESERVA, cl.idCliente, Regimen_Precio FROM gd_esquema.Maestra
+INSERT INTO MATOTA.Reserva (idReserva, fechaDesde, cantidadNoches, idRegimen, idEstadoReserva, idCliente, precioBaseReserva, idHotel)
+SELECT DISTINCT Reserva_Codigo, Reserva_Fecha_Inicio, Reserva_Cant_Noches, re.idRegimen, @ESTADORESERVA, cl.idCliente, Regimen_Precio, h.idHotel FROM gd_esquema.Maestra
 INNER JOIN MATOTA.Regimen re ON re.Nombre = Regimen_Descripcion
 INNER JOIN MATOTA.Cliente cl ON (cl.idTipoDocumento = @tipopasaporte AND cl.numeroDocumento = Cliente_Pasaporte_Nro AND cl.apellido = Cliente_Apellido AND cl.nombre = Cliente_Nombre)
+INNER JOIN MATOTA.Hotel h ON Hotel_Calle = h.calle AND Hotel_Nro_Calle = h.nroCalle AND Hotel_Ciudad = h.ciudad
 SET IDENTITY_INSERT MATOTA.Reserva OFF
-
 
 -- Migrar Estadias
 

@@ -199,11 +199,9 @@ estado BIT NOT NULL
 
 CREATE TABLE MATOTA.RegimenHotel(
 idHotel		INT NOT NULL REFERENCES MATOTA.Hotel,
-idRegimen	INT NOT NULL REFERENCES MATOTA.Regimen
+idRegimen	INT NOT NULL REFERENCES MATOTA.Regimen,
 PRIMARY KEY(idHotel, idRegimen)
 ); 
-
-
 
 CREATE TABLE MATOTA.EstadoReserva
 (
@@ -220,7 +218,6 @@ INSERT INTO MATOTA.EstadoReserva VALUES
 ('Reserva con ingreso (efectivizada)'),
 ('Reserva Migrada')
 
-
 CREATE TABLE MATOTA.Reserva
 (
 	idReserva NUMERIC(18,0) NOT NULL PRIMARY KEY IDENTITY(1,1),
@@ -228,12 +225,15 @@ fechaReserva DATETIME,
 fechaDesde  DATETIME NOT NULL,
 fechaHasta DATETIME,
 cantidadNoches NUMERIC(18,0) NOT NULL,
-idRegimen INT NOT NULL REFERENCES MATOTA.Regimen,
+idRegimen INT NOT NULL,
+idHotel INT NOT NULL,
 idEstadoReserva INT REFERENCES MATOTA.EstadoReserva,
 idCliente INT NOT NULL REFERENCES MATOTA.Cliente,
 precioBaseReserva NUMERIC(18,2),
 cantidadPersonas INT,
+FOREIGN KEY (idHotel,idRegimen) REFERENCES MATOTA.RegimenHotel(idHotel, idRegimen)
 ); 
+
 CREATE TABLE MATOTA.ReservaCancelada(
 	idReserva	NUMERIC(18,0) NOT NULL PRIMARY KEY REFERENCES MATOTA.Reserva,
 motivo		NVARCHAR(500) NOT NULL,

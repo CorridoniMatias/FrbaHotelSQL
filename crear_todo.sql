@@ -203,8 +203,6 @@ idRegimen	INT NOT NULL REFERENCES MATOTA.Regimen
 PRIMARY KEY(idHotel, idRegimen)
 ); 
 
-
-
 CREATE TABLE MATOTA.EstadoReserva
 (
 	idEstadoReserva INT PRIMARY KEY IDENTITY(1,1),
@@ -220,7 +218,6 @@ INSERT INTO MATOTA.EstadoReserva VALUES
 ('Reserva con ingreso (efectivizada)'),
 ('Reserva Migrada')
 
-
 CREATE TABLE MATOTA.Reserva
 (
 	idReserva NUMERIC(18,0) NOT NULL PRIMARY KEY IDENTITY(1,1),
@@ -228,12 +225,15 @@ fechaReserva DATETIME,
 fechaDesde  DATETIME NOT NULL,
 fechaHasta DATETIME,
 cantidadNoches NUMERIC(18,0) NOT NULL,
-idRegimen INT NOT NULL REFERENCES MATOTA.Regimen,
+idRegimen INT NOT NULL,
+idHotel INT NOT NULL,
 idEstadoReserva INT REFERENCES MATOTA.EstadoReserva,
 idCliente INT NOT NULL REFERENCES MATOTA.Cliente,
 precioBaseReserva NUMERIC(18,2),
 cantidadPersonas INT,
+FOREIGN KEY (idHotel,idRegimen) REFERENCES MATOTA.RegimenHotel(idHotel, idRegimen)
 ); 
+
 CREATE TABLE MATOTA.ReservaCancelada(
 	idReserva	NUMERIC(18,0) NOT NULL PRIMARY KEY REFERENCES MATOTA.Reserva,
 motivo		NVARCHAR(500) NOT NULL,
@@ -441,10 +441,11 @@ ORDER BY Cliente_Pasaporte_Nro
 DECLARE @ESTADORESERVA INT = (SELECT idEstadoReserva FROM MATOTA.EstadoReserva WHERE descripcion = 'Reserva Migrada')
 
 SET IDENTITY_INSERT MATOTA.Reserva ON
-INSERT INTO MATOTA.Reserva (idReserva, fechaDesde, cantidadNoches, idRegimen, idEstadoReserva, idCliente, precioBaseReserva)
-SELECT DISTINCT Reserva_Codigo, Reserva_Fecha_Inicio, Reserva_Cant_Noches, re.idRegimen, @ESTADORESERVA, cl.idCliente, Regimen_Precio FROM gd_esquema.Maestra
+INSERT INTO MATOTA.Reserva (idReserva, fechaDesde, cantidadNoches, idRegimen, idEstadoReserva, idCliente, precioBaseReserva, idHotel)
+SELECT DISTINCT Reserva_Codigo, Reserva_Fecha_Inicio, Reserva_Cant_Noches, re.idRegimen, @ESTADORESERVA, cl.idCliente, Regimen_Precio, h.idHotel FROM gd_esquema.Maestra
 INNER JOIN MATOTA.Regimen re ON re.Nombre = Regimen_Descripcion
 INNER JOIN MATOTA.Cliente cl ON (cl.idTipoDocumento = @tipopasaporte AND cl.numeroDocumento = Cliente_Pasaporte_Nro AND cl.apellido = Cliente_Apellido AND cl.nombre = Cliente_Nombre)
+INNER JOIN MATOTA.Hotel h ON Hotel_Calle = h.calle AND Hotel_Nro_Calle = h.nroCalle AND Hotel_Ciudad = h.ciudad
 SET IDENTITY_INSERT MATOTA.Reserva OFF
 
 
