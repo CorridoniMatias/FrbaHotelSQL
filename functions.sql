@@ -77,3 +77,64 @@ BEGIN
 	RETURN @@ROWCOUNT;
 END
 GO
+CREATE PROCEDURE MATOTA.UpdateCliente(@nombre nvarchar(255),@apellido nvarchar(255),@tipoDoc int,
+									@numeroDocumento numeric(18,0),@mail nvarchar(255),@telefono varchar(80),
+									@calle nvarchar(255),@nroCalle numeric(18,0),@piso numeric(18,0),@departamento nvarchar(50),
+									@localidad nvarchar(255),@pais nvarchar(60),@nacionalidad nvarchar(255),@fechaNacimiento datetime,@habilitado bit,
+									@tipoDocOriginal int,@numDoc numeric(18,0))
+AS
+BEGIN
+	IF EXISTS (SELECT idTipoDocumento,numeroDocumento FROM MATOTA.Cliente WHERE idTipoDocumento = @tipoDoc AND numeroDocumento = @numeroDocumento AND idTipoDocumento !=@tipoDocOriginal AND numeroDocumento != @numDoc)
+		RETURN -1;
+	IF EXISTS (SELECT mail FROM MATOTA.Cliente WHERE mail = @mail AND idTipoDocumento != @tipoDocOriginal AND numeroDocumento != @numDoc)
+		RETURN 0;
+	UPDATE MATOTA.Cliente SET nombre = @nombre,apellido = @apellido,idTipoDocumento = @tipoDoc,numeroDocumento = @numeroDocumento,mail = @mail,
+							  telefono = @telefono, calle = @calle,nroCalle = @nroCalle, piso = @piso, departamento = @departamento,localidad = @localidad,
+							  pais = @pais, nacionalidad = @nacionalidad, fechaNacimiento = @fechaNacimiento , habilitado = @habilitado
+	WHERE idTipoDocumento = @tipoDocOriginal AND numeroDocumento = @numDoc
+	RETURN 1;
+END
+GO
+
+
+CREATE PROCEDURE MATOTA.getTipoDoc(@idTipoDoc int)
+AS
+BEGIN
+	SELECT nombre FROM MATOTA.TipoDocumento WHERE IdTipoDocumento = @idTipoDoc
+END
+GO
+
+CREATE PROCEDURE MATOTA.altaHabitacion(@nroHabitacion numeric(18,0),@piso numeric(18,0),@idUbicacion int, @idTipoHabitacion numeric(18,0),@idHotel int,
+								  @descripcion nvarchar(255),@comodidades nvarchar(255))
+AS
+BEGIN
+	IF EXISTS(SELECT idHotel,nroHabitacion FROM MATOTA.Habitacion WHERE idHotel = @idHotel AND nroHabitacion = @nroHabitacion)
+		RETURN 0;
+	INSERT INTO MATOTA.Habitacion VALUES (@idHotel,@nroHabitacion,@piso,@idUbicacion,@idTipoHabitacion,@descripcion,@comodidades,1)
+	RETURN 1;
+END
+GO
+
+CREATE PROCEDURE MATOTA.agregarNombresHotel
+AS
+BEGIN
+	UPDATE MATOTA.Hotel SET
+	nombre = CASE 
+				WHEN idHotel = 1 THEN 'Matota'
+				WHEN idHotel = 2 THEN 'Pepy'
+				WHEN idHotel = 3 THEN 'Calafate'
+				WHEN idHotel = 4 THEN 'Huemul'
+				WHEN idHotel = 5 THEN 'Genérico'
+				WHEN idHotel = 6 THEN 'King'
+				WHEN idHotel = 7 THEN 'Super Hotel'
+				WHEN idHotel = 8 THEN 'Refugio'
+				WHEN idHotel = 9 THEN 'Hotel'
+				WHEN idHotel = 10 THEN 'Deportes'
+				WHEN idHotel = 11 THEN 'GDD'
+				WHEN idHotel = 12 THEN 'TGC'
+				WHEN idHotel = 13 THEN 'Inolvidable'
+				WHEN idHotel = 14 THEN 'PdP'
+				WHEN idHotel = 15 THEN 'Panchocho'
+	END
+END
+GO
