@@ -96,6 +96,19 @@ BEGIN
 END
 GO
 
+CREATE PROCEDURE MATOTA.UpdateHabitacion(@idHotel int,@nroHabitacion numeric(18,0),@piso numeric(18,0),
+									@idUbicacion int,@idTipoHabitacion numeric(18,0),@descripcion nvarchar(255),
+									@comodidades nvarchar(255),@habilitado bit)
+AS
+BEGIN
+	IF EXISTS (SELECT idHotel,nroHabitacion FROM MATOTA.Habitacion WHERE idHotel = @idHotel AND nroHabitacion = @nroHabitacion)
+		RETURN 0;
+	UPDATE MATOTA.Habitacion SET nroHabitacion = @nroHabitacion, piso = @piso, idUbicacion = @idUbicacion, descripcion = @descripcion,
+							  comodidades = @comodidades, habilitado = @habilitado
+	WHERE idHotel = @idHotel
+	RETURN 1;
+END
+GO
 
 CREATE PROCEDURE MATOTA.getTipoDoc(@idTipoDoc int)
 AS
