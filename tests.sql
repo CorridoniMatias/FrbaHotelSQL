@@ -16,3 +16,9 @@ DECLARE @reservas INT, @estadias INT;
 EXEC MATOTA.CheckRegimenHotelConstraint '2020-01-01',1,1, @reservas OUT, @estadias OUT;
 
 select @reservas, @estadias
+
+---
+DECLARE @reservas INT, @estadias INT;
+EXEC MATOTA.ReservasEstadiasEnPeriodo '2020-01-01',1,1, @reservas OUT, @estadias OUT;
+
+select @reservas, @estadias
