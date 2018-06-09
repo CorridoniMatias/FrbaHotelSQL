@@ -167,3 +167,19 @@ BEGIN
 	WHERE re.idHotel = @idHotel AND re.idRegimen = @idRegimen AND er.descripcion LIKE '%efectivizada%'
 END
 GO
+CREATE PROCEDURE MATOTA.ReservasEstadiasEnPeriodo(@fechaDesde DATETIME, @fechaHasta DATETIME, @idHotel INT, @reservas INT OUT, @estadias INT OUT) AS
+BEGIN
+	--Cuenta la cant de reservas que hay activas, se considera activa si la fecha desde todavia no paso y no fue cancelada.
+	SELECT @reservas = COUNT(re.idReserva) FROM MATOTA.Reserva re
+	INNER JOIN MATOTA.EstadoReserva er ON (re.idEstadoReserva = er.idEstadoReserva)
+	WHERE (@fechaDesde <= re.fechaDesde AND re.fechaDesde <= @fechaHasta )--OR @fechaActual <= DATEADD(DAY, re.cantidadNoches, re.fechaDesde) 
+			AND re.idHotel = @idHotel AND re.idRegimen = @idRegimen
+			AND er.descripcion NOT LIKE '%cancelada%'
+
+	-- Cuenta las estadias en curso, esta en curso si la reserva asociada tiene estado efectivizada y la fecha actual es mayor a la fecha de inicio y todavia no hay fecha de salida.
+	SELECT @estadias = COUNT(e.idEstadia) FROM MATOTA.Reserva re
+	INNER JOIN MATOTA.EstadoReserva er ON (re.idEstadoReserva = er.idEstadoReserva)
+	INNER JOIN MATOTA.Estadia e ON (e.idReserva = re.idReserva AND (e.fechaIngreso >= @fechaDesde AND e.fechaSalida IS NULL))
+	WHERE re.idHotel = @idHotel AND re.idRegimen = @idRegimen AND er.descripcion LIKE '%efectivizada%'
+END
+GO
