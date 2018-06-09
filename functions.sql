@@ -138,3 +138,12 @@ BEGIN
 	END
 END
 GO
+CREATE PROCEDURE MATOTA.CheckRegimenHotelConstraint(@fechaActual DATETIME, @idHotel INT, @idRegimen INT, @reservas INT OUT, @estadias INT OUT) AS
+BEGIN
+	SELECT @reservas = COUNT(re.idReserva), @estadias = COUNT(e.idEstadia)
+	FROM MATOTA.RegimenHotel rh
+	LEFT JOIN MATOTA.Reserva re ON (re.idRegimen = rh.idRegimen AND re.idHotel = rh.idHotel AND (@fechaActual <= re.fechaDesde OR @fechaActual <= DATEADD(DAY, re.cantidadNoches, re.fechaDesde)) )
+	LEFT JOIN MATOTA.Estadia e ON (e.idReserva = re.idReserva AND (e.fechaIngreso <= @fechaActual OR e.fechaSalida IS NULL))
+	WHERE rh.idHotel = @idHotel AND rh.idRegimen = @idRegimen
+END
+GO
