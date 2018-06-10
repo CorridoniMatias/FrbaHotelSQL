@@ -193,3 +193,27 @@ BEGIN
 	EXEC @inactividades = MATOTA.GetInactividadesEnPeriodo @fechaDesde, @fechaHasta, @idHotel;
 END
 GO
+CREATE PROCEDURE MATOTA.ActualizarReservasVencidas(@fechaSistema DATETIME) AS 
+BEGIN
+	DECLARE @estadoVencida INT;
+	SELECT @estadoVencida = idEstadoReserva FROM MATOTA.EstadoReserva WHERE descripcion LIKE '%No-Show%';
+
+	SELECT r.idReserva INTO #vencidas FROM MATOTA.Reserva r 
+	LEFT JOIN MATOTA.Estadia e ON r.idReserva = e.idReserva
+	WHERE r.fechaDesde < @fechaSistema AND idEstadia IS NULL AND r.idEstadoReserva != @estadoVencida
+
+	UPDATE MATOTA.Reserva SET idEstadoReserva = @estadoVencida WHERE idReserva IN (SELECT * FROM #vencidas);
+END
+GO
+CREATE FUNCTION MATOTA.ReservaEsValida(@idReserva INT, @idHotel INT, @fechaSistema DATETIME)
+RETURNS BIT AS
+BEGIN
+	DECLARE @valida BIT;
+
+	SELECT @valida = COUNT(r.idReserva) FROM MATOTA.Reserva r
+	LEFT JOIN MATOTA.Estadia e ON r.idReserva = e.idReserva
+	WHERE r.idReserva = @idReserva AND r.idHotel = @idHotel AND fechaDesde = @fechaSistema AND idEstadia IS NULL;
+
+	RETURN @valida
+END
+GO
