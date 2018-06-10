@@ -68,7 +68,7 @@ BEGIN
 		RETURN 0;
 	INSERT INTO MATOTA.Cliente VALUES (@nombre,@apellido,@tipoDoc,@numeroDocumento,@mail,@telefono,@calle,@nroCalle,
 									   @piso,@departamento,@localidad,@pais,@nacionalidad,@fechaNacimiento,1,1)
-	RETURN 1;
+	RETURN SCOPE_IDENTITY();
 END
 GO
 CREATE PROCEDURE MATOTA.UpdatePassword(@userid INT, @password VARCHAR(20)) AS
@@ -193,7 +193,6 @@ BEGIN
 	RETURN @valida
 END
 GO
-
 CREATE PROCEDURE MATOTA.habitacionParaReserva(@idHotel int,@cantPersonasReserva int)
 AS
 BEGIN
@@ -219,5 +218,16 @@ RETURNS INT
 AS
 BEGIN
 	RETURN DATEDIFF(DAY,@fechaInicio,@fechaFin)
+END
+GO
+CREATE PROCEDURE MATOTA.DatosBaseCheckIn(@idReserva INT, @cantidadPersonas INT OUT, @idCliente INT OUT, @nombreCliente NVARCHAR(255) OUT, @apellidoCliente NVARCHAR(255) OUT) AS
+BEGIN
+	SELECT @cantidadPersonas = COALESCE(r.cantidadPersonas, -1), 
+			@idCliente = COALESCE(c.idCliente, -1),
+			@nombreCliente = c.nombre,
+			@apellidoCliente = c.apellido
+	FROM MATOTA.Reserva r
+	LEFT JOIN MATOTA.Cliente c ON c.idCliente = r.idCliente
+	WHERE r.idReserva = @idReserva;
 END
 GO

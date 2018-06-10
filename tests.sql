@@ -22,3 +22,5 @@ DECLARE @reservas INT, @estadias INT;
 EXEC MATOTA.ReservasEstadiasEnPeriodo '2020-01-01',1,1, @reservas OUT, @estadias OUT;
 
 select @reservas, @estadias
+-------------------------------------------
+INSERT INTO MATOTA.Reserva
