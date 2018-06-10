@@ -126,30 +126,6 @@ BEGIN
 	RETURN 1;
 END
 GO
-
-CREATE PROCEDURE MATOTA.agregarNombresHotel
-AS
-BEGIN
-	UPDATE MATOTA.Hotel SET
-	nombre = CASE 
-				WHEN idHotel = 1 THEN 'Matota'
-				WHEN idHotel = 2 THEN 'Pepy'
-				WHEN idHotel = 3 THEN 'Calafate'
-				WHEN idHotel = 4 THEN 'Huemul'
-				WHEN idHotel = 5 THEN 'Genérico'
-				WHEN idHotel = 6 THEN 'King'
-				WHEN idHotel = 7 THEN 'Super Hotel'
-				WHEN idHotel = 8 THEN 'Refugio'
-				WHEN idHotel = 9 THEN 'Hotel'
-				WHEN idHotel = 10 THEN 'Deportes'
-				WHEN idHotel = 11 THEN 'GDD'
-				WHEN idHotel = 12 THEN 'TGC'
-				WHEN idHotel = 13 THEN 'Inolvidable'
-				WHEN idHotel = 14 THEN 'PdP'
-				WHEN idHotel = 15 THEN 'Panchocho'
-	END
-END
-GO
 CREATE PROCEDURE MATOTA.CheckRegimenHotelConstraint(@fechaActual DATETIME, @idHotel INT, @idRegimen INT, @reservas INT OUT, @estadias INT OUT) AS
 BEGIN
 	--Cuenta la cant de reservas que hay activas, se considera activa si la fecha desde todavia no paso y no fue cancelada.
@@ -215,5 +191,33 @@ BEGIN
 	WHERE r.idReserva = @idReserva AND r.idHotel = @idHotel AND fechaDesde = @fechaSistema AND idEstadia IS NULL;
 
 	RETURN @valida
+END
+GO
+
+CREATE PROCEDURE MATOTA.habitacionParaReserva(@idHotel int,@cantPersonasReserva int)
+AS
+BEGIN
+	SELECT TOP 1 nroHabitacion FROM MATOTA.Habitacion h JOIN MATOTA.TipoHabitacion th ON (h.idTipoHabitacion = th.idTipoHabitacion) 
+	WHERE idHotel = @idHotel AND th.cantidadPersonas >= @cantPersonasReserva AND h.habilitado = 1
+END 
+GO
+
+CREATE FUNCTION MATOTA.PrecioHabitacion(@idHotel int,@nroHabitacion int,@cantPersonas int)
+RETURNS NUMERIC(10,2) 
+AS
+BEGIN
+	DECLARE @precio NUMERIC(10,2),@cantEstrellas int,@porcentajeHabitacion numeric(18,2);
+	SET @cantEstrellas = (SELECT TOP 1 cantidadEstrellas FROM MATOTA.Hotel WHERE idHotel = @idHotel)
+	SET @porcentajeHabitacion = (SELECT TOP 1 porcentajeExtra FROM MATOTA.TipoHabitacion th JOIN MATOTA.Habitacion h ON (th.idTipoHabitacion = h.idTipoHabitacion) WHERE h.nroHabitacion = @nroHabitacion)
+	SET @precio = @cantEstrellas*@porcentajeHabitacion*@cantPersonas
+	RETURN @precio
+END
+GO
+
+CREATE FUNCTION MATOTA.CantNoches(@fechaInicio datetime,@fechaFin datetime)
+RETURNS INT 
+AS
+BEGIN
+	RETURN DATEDIFF(DAY,@fechaInicio,@fechaFin)
 END
 GO
