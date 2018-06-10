@@ -23,4 +23,12 @@ EXEC MATOTA.ReservasEstadiasEnPeriodo '2020-01-01',1,1, @reservas OUT, @estadias
 
 select @reservas, @estadias
 -------------------------------------------
-INSERT INTO MATOTA.Reserva
+INSERT INTO MATOTA.Reserva 
+(fechaReserva, fechaDesde, fechaHasta, cantidadNoches, idRegimen, idHotel, idEstadoReserva, idCliente, precioBaseReserva, cantidadPersonas) 
+VALUES
+(GETDATE(), '2017-01-01', GETDATE(), 1, 1, 16, 1, 96945, 17, 3)
+
+select * from MATOTA.Cliente
+select * from MATOTA.Reserva
+
+update matota.Reserva set idHotel = 12 where idReserva = 106945

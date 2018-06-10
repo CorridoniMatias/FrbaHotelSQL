@@ -279,7 +279,7 @@ CREATE TABLE MATOTA.Estadia
 idReserva NUMERIC(18,0) REFERENCES MATOTA.Reserva,
 fechaIngreso DATETIME NOT NULL,
 fechaSalida DATETIME,
-cantidadNoches NUMERIC(18,0) NOT NULL,
+cantidadNoches NUMERIC(18,0),
 	idUsuario INT REFERENCES MATOTA.Usuario
 );
 
