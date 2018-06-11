@@ -31,24 +31,6 @@ BEGIN
 END
 GO
 
-CREATE TYPE MATOTA.TablaPermisos AS TABLE (
-	idPermiso INT
-)
-
-GO
-
-CREATE PROCEDURE MATOTA.crearRol (@nombre NVARCHAR(20), @permisos MATOTA.TablaPermisos READONLY, @estado BIT) AS
-BEGIN
-	DECLARE @idRol INT;
-	IF(EXISTS(SELECT * FROM MATOTA.Rol WHERE nombre = @nombre))
-		RETURN -1;
-	INSERT INTO MATOTA.Rol (nombre, estado) VALUES (@nombre, @estado)
-	SELECT @idRol = idRol FROM MATOTA.Rol r WHERE r.NOMBRE = @nombre
-	INSERT INTO MATOTA.PermisosRol SELECT DISTINCT @idRol, idPermiso FROM @permisos
-	RETURN 1;
-END
-GO
-
 CREATE FUNCTION MATOTA.GetGuestRoleID()
 RETURNS INT AS
 BEGIN
