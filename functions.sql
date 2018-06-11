@@ -223,17 +223,15 @@ BEGIN
 	RETURN @@ROWCOUNT;
 END
 GO
-CREATE FUNCTION MATOTA.GetEstadiaForHabitacion(@nroHabitacion NUMERIC(18,0), @idHotel INT, @fechaSistema DATETIME)
-RETURNS INT AS
+CREATE PROCEDURE MATOTA.GetEstadiaForHabitacion(@nroHabitacion NUMERIC(18,0), @idHotel INT, @fechaSistema DATETIME, @idEstadia INT OUT, @idReservaHabitacion INT OUT) AS
 BEGIN
-	RETURN (SELECT TOP 1 e.idEstadia FROM MATOTA.ReservaHabitacion re
+	SELECT TOP 1 @idEstadia = e.idEstadia, @idReservaHabitacion = re.idReservaHabitacion FROM MATOTA.ReservaHabitacion re
 		INNER JOIN MATOTA.Reserva r ON re.idReserva = r.idReserva 
 		INNER JOIN MATOTA.Estadia e ON e.idReserva = r.idReserva 
 	WHERE re.nroHabitacion = @nroHabitacion AND re.idHotel = @idHotel AND e.fechaSalida IS NULL AND  e.fechaIngreso <= @fechaSistema
-	ORDER BY e.fechaIngreso DESC)
+	ORDER BY e.fechaIngreso DESC
 END
 GO
-
 CREATE FUNCTION MATOTA.personasHabitacion (@idHotel int , @nroHabitacion int)
 RETURNS INT AS
 BEGIN
