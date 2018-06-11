@@ -233,3 +233,34 @@ BEGIN
 	ORDER BY e.fechaIngreso DESC)
 END
 GO
+
+CREATE FUNCTION MATOTA.personasHabitacion (@idHotel int , @nroHabitacion int)
+RETURNS INT AS
+BEGIN
+	DECLARE @idTipoHabitacion int
+	SET @idTipoHabitacion = (SELECT idTipoHabitacion FROM MATOTA.Habitacion WHERE nroHabitacion = @nroHabitacion)
+	RETURN  CASE
+				WHEN @idTipoHabitacion = 1001 THEN 1
+				WHEN @idTipoHabitacion = 1002 THEN 2
+				WHEN @idTipoHabitacion = 1003 THEN 3
+				WHEN @idTipoHabitacion = 1004 THEN 4
+				WHEN @idTipoHabitacion = 1005 THEN 5
+				END
+END
+GO
+
+CREATE PROCEDURE MATOTA.AltaReserva(@idHotel int,@fechaReserva datetime,@fechaDesde datetime,@fechaHasta datetime,@cantidadNoches int,@idRegimen int,@idCliente int,@precioBase numeric(18,2),@cantidadPersonas int)
+AS
+BEGIN
+	INSERT INTO MATOTA.Reserva VALUES (@fechaReserva,@fechaDesde,@fechaHasta,@cantidadNoches,@idRegimen,@idHotel,1,@idCliente,@precioBase,@cantidadPersonas)
+	RETURN SCOPE_IDENTITY();
+END
+GO
+
+CREATE PROCEDURE MATOTA.agregarHabitacionesReservadas (@nroHabitacion int,@idReserva int, @idHotel int)
+AS
+BEGIN
+	INSERT INTO MATOTA.ReservaHabitacion VALUES (@idReserva,@idHotel,@nroHabitacion)
+	UPDATE MATOTA.Habitacion SET habilitado = 0 WHERE nroHabitacion = @nroHabitacion AND idHotel = @idHotel
+END
+GO

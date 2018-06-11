@@ -8,6 +8,7 @@ DROP FUNCTION	MATOTA.GetInactividadesEnPeriodo
 DROP FUNCTION	MATOTA.CantNoches
 DROP FUNCTION	MATOTA.GetEstadiaForHabitacion
 DROP FUNCTION	MATOTA.PrecioHabitacion
+DROP FUNCTION   MATOTA.personasHabitacion
 DROP PROCEDURE	MATOTA.loginUsuario
 DROP PROCEDURE	MATOTA.EfectivizarReserva
 DROP PROCEDURE	MATOTA.DatosBaseCheckIn
@@ -21,6 +22,8 @@ DROP PROCEDURE	MATOTA.CheckRegimenHotelConstraint
 DROP PROCEDURE	MATOTA.ReservasEstadiasEnPeriodo
 DROP PROCEDURE	MATOTA.UpdateHabitacion
 DROP PROCEDURE	MATOTA.habitacionParaReserva
+DROP PROCEDURE  MATOTA.AltaReserva
+DROP PROCEDURE  MATOTA.agregarHabitacionesReservadas
 -- TYPES
 --TABLES & SCHEMA
 DROP TABLE MATOTA.ItemFactura
