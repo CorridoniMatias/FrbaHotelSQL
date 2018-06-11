@@ -231,3 +231,23 @@ BEGIN
 	WHERE r.idReserva = @idReserva;
 END
 GO
+CREATE PROCEDURE MATOTA.EfectivizarReserva(@idReserva INT) AS
+BEGIN
+	DECLARE @estadoEfectivizada INT;
+	SELECT @estadoEfectivizada = idEstadoReserva FROM MATOTA.EstadoReserva WHERE descripcion LIKE '%efectivizada%';
+
+	UPDATE MATOTA.Reserva SET idEstadoReserva = @estadoEfectivizada WHERE idReserva = @idReserva
+
+	RETURN @@ROWCOUNT;
+END
+GO
+CREATE FUNCTION MATOTA.GetEstadiaForHabitacion(@nroHabitacion NUMERIC(18,0), @idHotel INT, @fechaSistema DATETIME)
+RETURNS INT AS
+BEGIN
+	RETURN (SELECT TOP 1 e.idEstadia FROM MATOTA.ReservaHabitacion re
+		INNER JOIN MATOTA.Reserva r ON re.idReserva = r.idReserva 
+		INNER JOIN MATOTA.Estadia e ON e.idReserva = r.idReserva 
+	WHERE re.nroHabitacion = @nroHabitacion AND re.idHotel = @idHotel AND e.fechaSalida IS NULL AND  e.fechaIngreso <= @fechaSistema
+	ORDER BY e.fechaIngreso DESC)
+END
+GO
