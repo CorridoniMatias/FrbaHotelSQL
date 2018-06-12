@@ -280,9 +280,70 @@ BEGIN
 	RETURN (SELECT idUsuario FROM MATOTA.Usuario u WHERE u.username = @username)
 END
 GO
+-- Estadisticas
+CREATE PROCEDURE MATOTA.PeriodoTrimestre(@nroTrimestre INT, @year INT, @fdesde DATE OUT, @fhasta DATE OUT) AS
+BEGIN
+	DECLARE @desde TINYINT, @hasta TINYINT;
 
+	IF @nroTrimestre = 1
+	BEGIN
+		SELECT @desde = 1, @hasta = 3
+	END
 
+	IF @nroTrimestre = 2
+	BEGIN
+		SELECT @desde = 3, @hasta = 6
+	END
 
+	IF @nroTrimestre = 3
+	BEGIN
+		SELECT @desde = 6, @hasta = 9
+	END
 
+	IF @nroTrimestre = 4
+	BEGIN
+		SELECT @desde = 9, @hasta = 12
+	END
 
+	SELECT @fdesde = DATEFROMPARTS(@year, @desde, 1), @fhasta = DATEFROMPARTS(@year, @hasta, 1)
+END
+GO
+CREATE PROCEDURE MATOTA.HotelesReservasCanceladas(@nroTrimestre INT, @year INT) AS
+BEGIN
+	DECLARE	@desde DATE, @hasta DATE;
+	EXEC MATOTA.PeriodoTrimestre @nroTrimestre, @year, @desde OUT, @hasta OUT
 
+	SELECT TOP 5 h.nombre, h.calle, h.nroCalle, h.ciudad, h.pais, COUNT(r.idReserva) 'Reservas Canceladas' FROM MATOTA.Hotel h
+		INNER JOIN MATOTA.Reserva r ON r.idHotel = h.idHotel
+		INNER JOIN MATOTA.EstadoReserva er ON r.idEstadoReserva = er.idEstadoReserva
+		WHERE er.descripcion LIKE '%cancelada%' AND r.fechaDesde BETWEEN @desde AND @hasta
+		GROUP BY h.nombre, h.calle, h.nroCalle, h.ciudad, h.pais, h.idHotel
+		ORDER BY 6 DESC
+END
+GO
+CREATE PROCEDURE MATOTA.HotelesMayorCantConsumibles(@nroTrimestre INT, @year INT) AS
+BEGIN
+	DECLARE	@desde DATE, @hasta DATE;
+	EXEC MATOTA.PeriodoTrimestre @nroTrimestre, @year, @desde OUT, @hasta OUT
+
+	SELECT TOP 5 h.nombre, h.calle, h.nroCalle, h.ciudad, h.pais, COUNT(ce.idConsumibleEstadia) 'Consumibles Facturados' FROM MATOTA.Hotel h
+		INNER JOIN MATOTA.ReservaHabitacion rh ON rh.idHotel = h.idHotel
+		INNER JOIN MATOTA.ConsumiblesEstadia ce ON ce.idReservaHabitacion = rh.idReservaHabitacion
+		INNER JOIN MATOTA.Reserva r ON r.idReserva = rh.idReserva
+		WHERE r.fechaDesde BETWEEN @desde AND @hasta
+		GROUP BY h.nombre, h.calle, h.nroCalle, h.ciudad, h.pais, h.idHotel
+		ORDER BY 6 DESC
+END
+GO
+CREATE PROCEDURE MATOTA.HotelesMayorDiasInactivo(@nroTrimestre INT, @year INT) AS
+BEGIN
+	DECLARE	@desde DATE, @hasta DATE;
+	EXEC MATOTA.PeriodoTrimestre @nroTrimestre, @year, @desde OUT, @hasta OUT
+
+	SELECT TOP 5 h.nombre, h.calle, h.nroCalle, h.ciudad, h.pais, SUM( DATEDIFF(DAY, ih.fechaInicio, ih.fechaFin) ) 'Dias Inactivo' FROM MATOTA.Hotel h
+		INNER JOIN MATOTA.InactividadHotel ih ON ih.idHotel = h.idHotel
+		WHERE ih.fechaInicio BETWEEN @desde AND @hasta AND ih.fechaFin BETWEEN @desde AND @hasta
+		GROUP BY h.nombre, h.calle, h.nroCalle, h.ciudad, h.pais, h.idHotel
+		ORDER BY 6 DESC
+END
+GO

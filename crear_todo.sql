@@ -497,3 +497,7 @@ LEFT JOIN MATOTA.ConsumiblesEstadia ce ON (ce.idReservaHabitacion = rh.idReserva
 WHERE Factura_Nro IS NOT NULL 
 
 commit tran migracion
+
+-- Creacion de indices optimizadores de busquedas:
+CREATE INDEX idx_idHotelInInactividad ON MATOTA.InactividadHotel (idHotel)
+CREATE INDEX idx_hotel_habitacion ON Matota.ReservaHabitacion (idHotel, nroHabitacion)
