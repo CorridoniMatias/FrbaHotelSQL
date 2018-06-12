@@ -183,14 +183,15 @@ BEGIN
 END 
 GO
 
-CREATE FUNCTION MATOTA.PrecioHabitacion(@idHotel int,@nroHabitacion int,@cantPersonas int)
+CREATE FUNCTION MATOTA.PrecioHabitacion(@idHotel int,@nroHabitacion int,@cantPersonas int,@idRegimen int)
 RETURNS NUMERIC(10,2) 
 AS
 BEGIN
-	DECLARE @precio NUMERIC(10,2),@cantEstrellas int,@porcentajeHabitacion numeric(18,2);
-	SET @cantEstrellas = (SELECT TOP 1 cantidadEstrellas FROM MATOTA.Hotel WHERE idHotel = @idHotel)
+	DECLARE @precio NUMERIC(10,2),@recargaEstrellas numeric(18,0),@porcentajeHabitacion numeric(18,2),@precioBase numeric(18,2);
+	SET @recargaEstrellas = (SELECT TOP 1 recargaEstrellas FROM MATOTA.Hotel WHERE idHotel = @idHotel)
 	SET @porcentajeHabitacion = (SELECT TOP 1 porcentajeExtra FROM MATOTA.TipoHabitacion th JOIN MATOTA.Habitacion h ON (th.idTipoHabitacion = h.idTipoHabitacion) WHERE h.nroHabitacion = @nroHabitacion)
-	SET @precio = @cantEstrellas*@porcentajeHabitacion*@cantPersonas
+	SET @precioBase = (SELECT TOP 1 precioBase FROM MATOTA.Regimen WHERE idRegimen = @idRegimen)
+	SET @precio = (@recargaEstrellas*@porcentajeHabitacion*@cantPersonas) + @precioBase
 	RETURN @precio
 END
 GO
@@ -258,8 +259,11 @@ GO
 CREATE PROCEDURE MATOTA.agregarHabitacionesReservadas (@nroHabitacion int,@idReserva int, @idHotel int)
 AS
 BEGIN
+	IF NOT EXISTS (SELECT nroHabitacion FROM MATOTA.ReservaHabitacion WHERE idReserva = @idReserva AND idHotel = @idHotel AND nroHabitacion = @nroHabitacion)
+	BEGIN
 	INSERT INTO MATOTA.ReservaHabitacion VALUES (@idReserva,@idHotel,@nroHabitacion)
 	UPDATE MATOTA.Habitacion SET habilitado = 0 WHERE nroHabitacion = @nroHabitacion AND idHotel = @idHotel
+	END
 END
 GO
 
@@ -278,6 +282,47 @@ BEGIN
 	INSERT INTO MATOTA.Usuario (username, password, nombre, apellido, idTipoDocumento, numeroDocumento, mail, telefono, calle, nroCalle, piso, departamento, localidad, pais, fechaNacimiento, habilitado)
 	VALUES (@username, MATOTA.CrearContraseña(@password) , @nombre, @apellido, @idTipoDocumento, @numeroDocumento, @mail, @telefono, @calle, @nroCalle, @piso, @departamento, @localidad, @pais, @fechaNacimiento, 1)
 	RETURN (SELECT idUsuario FROM MATOTA.Usuario u WHERE u.username = @username)
+END
+GO
+
+CREATE TYPE MATOTA.nroHabitaciones AS TABLE
+	(
+		nroHabitacion INT
+	)
+GO
+
+CREATE PROCEDURE MATOTA.ListarHabitacionesReserva (@habitaciones AS MATOTA.nroHabitaciones READONLY)
+AS
+BEGIN
+	SELECT h.nroHabitacion 'Nro. habitacion',h.piso Piso,th.descripcion 'Descripción',u.descripcion 'Ubicación'
+	FROM MATOTA.Habitacion h JOIN MATOTA.TipoHabitacion th ON (h.idTipoHabitacion = th.idTipoHabitacion) JOIN MATOTA.UbicacionHabitacion u ON (u.idUbicacion = h.idUbicacion)
+	WHERE h.nroHabitacion IN (SELECT nroHabitacion FROM @habitaciones)
+END
+GO
+
+CREATE PROCEDURE MATOTA.UpdateReserva(@idReserva int,@fechaDesde datetime,@fechaHasta datetime,@cantNoches int,@idRegimen int,@precioBaseReserva numeric(18,2),@cantidadPersonas int)
+AS
+BEGIN	
+	UPDATE MATOTA.Reserva SET fechaDesde = @fechaDesde,fechaHasta = @fechaHasta,
+	cantidadNoches = @cantNoches,idRegimen=@idRegimen,idEstadoReserva = 2,precioBaseReserva = @precioBaseReserva,cantidadPersonas = @cantidadPersonas
+	WHERE idReserva = @idReserva
+	RETURN 1;
+END
+GO
+
+CREATE PROCEDURE MATOTA.QuitarHabitacionesReserva(@nroHabitacion int,@idReserva int, @idHotel int)
+AS
+BEGIN
+	DELETE FROM MATOTA.ReservaHabitacion WHERE nroHabitacion = @nroHabitacion AND idReserva = @idReserva AND idHotel = @idHotel
+	UPDATE MATOTA.Habitacion SET habilitado = 1 WHERE nroHabitacion = @nroHabitacion AND idHotel = @idHotel
+	RETURN 1
+END
+GO
+
+CREATE PROCEDURE MATOTA.GetHabitacionesReserva(@idReserva int)
+AS
+BEGIN
+	SELECT nroHabitacion FROM MATOTA.ReservaHabitacion WHERE idReserva = @idReserva
 END
 GO
 -- Estadisticas
@@ -345,30 +390,6 @@ BEGIN
 		WHERE ih.fechaInicio BETWEEN @desde AND @hasta AND ih.fechaFin BETWEEN @desde AND @hasta
 		GROUP BY h.nombre, h.calle, h.nroCalle, h.ciudad, h.pais, h.idHotel
 		ORDER BY 6 DESC
-END
-GO
-CREATE TYPE MATOTA.nroHabitaciones AS TABLE
-	(
-		nroHabitacion INT
-	)
-GO
-
-CREATE PROCEDURE MATOTA.GetHabitacionesReserva (@habitaciones AS MATOTA.nroHabitaciones READONLY)
-AS
-BEGIN
-	SELECT h.nroHabitacion 'Nro. habitacion',h.piso Piso,th.descripcion 'Descripción',u.descripcion 'Ubicación'
-	FROM MATOTA.Habitacion h JOIN MATOTA.TipoHabitacion th ON (h.idTipoHabitacion = th.idTipoHabitacion) JOIN MATOTA.UbicacionHabitacion u ON (u.idUbicacion = h.idUbicacion)
-	WHERE h.nroHabitacion IN (SELECT nroHabitacion FROM @habitaciones)
-END
-GO
-
-CREATE PROCEDURE MATOTA.UpdateReserva(@idReserva int,@fechaDesde datetime,@fechaHasta datetime,@cantNoches int,@idRegimen int,@precioBaseReserva numeric(18,2),@cantidadPersonas int)
-AS
-BEGIN	
-	UPDATE MATOTA.Reserva SET fechaDesde = @fechaDesde,fechaHasta = @fechaHasta,
-	cantidadNoches = @cantNoches,idRegimen=@idRegimen,idEstadoReserva = 2,precioBaseReserva = @precioBaseReserva,cantidadPersonas = @cantidadPersonas
-	WHERE idReserva = @idReserva
-	RETURN 1;
 END
 GO
 

@@ -32,6 +32,8 @@ DROP PROCEDURE  MATOTA.agregarHabitacionesReservadas
 DROP PROCEDURE  MATOTA.CrearUsuario
 DROP PROCEDURE  MATOTA.GetHabitacionesReserva
 DROP PROCEDURE  MATOTA.UpdateReserva
+DROP PROCEDURE  MATOTA.QuitarHabitacionesReserva
+DROP PROCEDURE  MATOTA.ListarHabitacionesReserva
 -- TYPES
 DROP TYPE  MATOTA.nroHabitaciones
 --TABLES & SCHEMA
