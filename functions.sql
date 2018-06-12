@@ -319,10 +319,22 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE MATOTA.GetHabitacionesReserva(@idReserva int)
+CREATE PROCEDURE MATOTA.GetHabitacionesReserva(@idReserva numeric(18,0))
 AS
 BEGIN
 	SELECT nroHabitacion FROM MATOTA.ReservaHabitacion WHERE idReserva = @idReserva
+END
+GO
+CREATE PROCEDURE MATOTA.CancelarReserva(@idReserva numeric(18,0),@motivo nvarchar(500),@fecha datetime,@idUsuario int)
+AS
+BEGIN
+	IF EXISTS (SELECT idReserva FROM MATOTA.ReservaCancelada WHERE idReserva = @idReserva)
+		RETURN 0;
+	ELSE
+	BEGIN
+		INSERT INTO MATOTA.ReservaCancelada VALUES(@idReserva,@motivo,@fecha,@idUsuario)
+		RETURN 1;
+	END
 END
 GO
 -- Estadisticas
@@ -392,5 +404,6 @@ BEGIN
 		ORDER BY 6 DESC
 END
 GO
+
 
 
