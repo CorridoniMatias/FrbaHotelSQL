@@ -347,3 +347,29 @@ BEGIN
 		ORDER BY 6 DESC
 END
 GO
+CREATE TYPE MATOTA.nroHabitaciones AS TABLE
+	(
+		nroHabitacion INT
+	)
+GO
+
+CREATE PROCEDURE MATOTA.GetHabitacionesReserva (@habitaciones AS MATOTA.nroHabitaciones READONLY)
+AS
+BEGIN
+	SELECT h.nroHabitacion 'Nro. habitacion',h.piso Piso,th.descripcion 'Descripción',u.descripcion 'Ubicación'
+	FROM MATOTA.Habitacion h JOIN MATOTA.TipoHabitacion th ON (h.idTipoHabitacion = th.idTipoHabitacion) JOIN MATOTA.UbicacionHabitacion u ON (u.idUbicacion = h.idUbicacion)
+	WHERE h.nroHabitacion IN (SELECT nroHabitacion FROM @habitaciones)
+END
+GO
+
+CREATE PROCEDURE MATOTA.UpdateReserva(@idReserva int,@fechaDesde datetime,@fechaHasta datetime,@cantNoches int,@idRegimen int,@precioBaseReserva numeric(18,2),@cantidadPersonas int)
+AS
+BEGIN	
+	UPDATE MATOTA.Reserva SET fechaDesde = @fechaDesde,fechaHasta = @fechaHasta,
+	cantidadNoches = @cantNoches,idRegimen=@idRegimen,idEstadoReserva = 2,precioBaseReserva = @precioBaseReserva,cantidadPersonas = @cantidadPersonas
+	WHERE idReserva = @idReserva
+	RETURN 1;
+END
+GO
+
+
