@@ -262,3 +262,27 @@ BEGIN
 	UPDATE MATOTA.Habitacion SET habilitado = 0 WHERE nroHabitacion = @nroHabitacion AND idHotel = @idHotel
 END
 GO
+
+CREATE FUNCTION MATOTA.CrearContraseña (@password VARCHAR(20))
+RETURNS NVARCHAR(64)
+AS
+BEGIN
+	RETURN (SELECT CONVERT(NVARCHAR(64),HashBytes('SHA2_256', @password),2))
+END
+GO
+
+CREATE PROCEDURE MATOTA.CrearUsuario (@username NVARCHAR(10), @password VARCHAR(20), @nombre NVARCHAR(82), @apellido NVARCHAR(82), @idTipoDocumento INT, @numeroDocumento NVARCHAR(20), @mail NVARCHAR(255),
+@telefono NVARCHAR(80), @calle NVARCHAR(255), @nroCalle INT, @localidad NVARCHAR(255), @pais NVARCHAR(60), @fechaNacimiento DATETIME, @piso INT = NULL, @departamento NVARCHAR(3) = NULL)
+AS
+BEGIN
+	INSERT INTO MATOTA.Usuario (username, password, nombre, apellido, idTipoDocumento, numeroDocumento, mail, telefono, calle, nroCalle, piso, departamento, localidad, pais, fechaNacimiento, habilitado)
+	VALUES (@username, MATOTA.CrearContraseña(@password) , @nombre, @apellido, @idTipoDocumento, @numeroDocumento, @mail, @telefono, @calle, @nroCalle, @piso, @departamento, @localidad, @pais, @fechaNacimiento, 1)
+	RETURN (SELECT idUsuario FROM MATOTA.Usuario u WHERE u.username = @username)
+END
+GO
+
+
+
+
+
+
