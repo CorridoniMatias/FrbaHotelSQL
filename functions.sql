@@ -163,6 +163,14 @@ BEGIN
 	UPDATE MATOTA.Reserva SET idEstadoReserva = @estadoVencida WHERE idReserva IN (SELECT * FROM #vencidas);
 END
 GO
+
+CREATE PROCEDURE MATOTA.habilitarHabitacionesDeReservasVencidas
+AS
+BEGIN
+	UPDATE MATOTA.Habitacion SET habilitado = 1 
+	WHERE nroHabitacion IN (SELECT nroHabitacion FROM MATOTA.ReservaHabitacion rh JOIN MATOTA.Reserva r ON (rh.idReserva = r.idReserva) WHERE r.idEstadoReserva = 5)
+END
+GO
 CREATE FUNCTION MATOTA.ReservaEsValida(@idReserva INT, @idHotel INT, @fechaSistema DATETIME)
 RETURNS BIT AS
 BEGIN
@@ -245,7 +253,7 @@ BEGIN
 				END
 END
 GO
-drop function MATOTA.personasHabitacion 
+
 CREATE PROCEDURE MATOTA.AltaReserva(@idHotel int,@fechaReserva datetime,@fechaDesde datetime,@fechaHasta datetime,@cantidadNoches int,@idRegimen int,@idCliente int,@precioBase numeric(18,2),@cantidadPersonas int)
 AS
 BEGIN
@@ -260,7 +268,6 @@ BEGIN
 	IF NOT EXISTS (SELECT nroHabitacion FROM MATOTA.ReservaHabitacion WHERE idReserva = @idReserva AND idHotel = @idHotel AND nroHabitacion = @nroHabitacion)
 	BEGIN
 	INSERT INTO MATOTA.ReservaHabitacion VALUES (@idReserva,@idHotel,@nroHabitacion)
-	UPDATE MATOTA.Habitacion SET habilitado = 0 WHERE nroHabitacion = @nroHabitacion AND idHotel = @idHotel
 	END
 END
 GO
@@ -280,21 +287,6 @@ BEGIN
 	INSERT INTO MATOTA.Usuario (username, password, nombre, apellido, idTipoDocumento, numeroDocumento, mail, telefono, calle, nroCalle, piso, departamento, localidad, pais, fechaNacimiento, habilitado)
 	VALUES (@username, MATOTA.CrearContraseña(@password) , @nombre, @apellido, @idTipoDocumento, @numeroDocumento, @mail, @telefono, @calle, @nroCalle, @piso, @departamento, @localidad, @pais, @fechaNacimiento, 1)
 	RETURN (SELECT idUsuario FROM MATOTA.Usuario u WHERE u.username = @username)
-END
-GO
-
-CREATE TYPE MATOTA.nroHabitaciones AS TABLE
-	(
-		nroHabitacion INT
-	)
-GO
-
-CREATE PROCEDURE MATOTA.ListarHabitacionesReserva (@habitaciones AS MATOTA.nroHabitaciones READONLY)
-AS
-BEGIN
-	SELECT h.nroHabitacion 'Nro. habitacion',h.piso Piso,th.descripcion 'Descripción',u.descripcion 'Ubicación'
-	FROM MATOTA.Habitacion h JOIN MATOTA.TipoHabitacion th ON (h.idTipoHabitacion = th.idTipoHabitacion) JOIN MATOTA.UbicacionHabitacion u ON (u.idUbicacion = h.idUbicacion)
-	WHERE h.nroHabitacion IN (SELECT nroHabitacion FROM @habitaciones)
 END
 GO
 
@@ -323,6 +315,7 @@ BEGIN
 	SELECT nroHabitacion FROM MATOTA.ReservaHabitacion WHERE idReserva = @idReserva
 END
 GO
+
 CREATE PROCEDURE MATOTA.CancelarReserva(@idReserva numeric(18,0),@motivo nvarchar(500),@fecha datetime,@idUsuario int)
 AS
 BEGIN
@@ -330,9 +323,26 @@ BEGIN
 		RETURN 0;
 	ELSE
 	BEGIN
+		IF (@idUsuario = -1)
+			SET @idUsuario = null
 		INSERT INTO MATOTA.ReservaCancelada VALUES(@idReserva,@motivo,@fecha,@idUsuario)
 		RETURN 1;
 	END
+END
+GO
+
+CREATE PROCEDURE MATOTA.HabitacionesNoReservadas(@idHotel int,@fechaDesde datetime,@fechaHasta datetime)
+AS
+BEGIN
+		SELECT h.nroHabitacion,th.descripcion,u.descripcion 
+		FROM MATOTA.Habitacion h JOIN MATOTA.TipoHabitacion th ON (h.idTipoHabitacion = th.idTipoHabitacion) JOIN MATOTA.UbicacionHabitacion u ON (h.idUbicacion = u.idUbicacion)
+		WHERE h.idHotel = @idHotel AND h.nroHabitacion NOT IN 
+									(SELECT distinct h.nroHabitacion FROM MATOTA.Habitacion h,MATOTA.Reserva r,Matota.ReservaHabitacion rh WHERE h.idHotel = @idHotel AND h.nroHabitacion = rh.nroHabitacion
+									 AND r.idReserva = rh.idReserva AND(
+									 (@fechaDesde BETWEEN r.fechaDesde AND r.fechaHasta) OR 
+									 (@fechaHasta BETWEEN r.fechaDesde AND r.fechaHasta) OR
+									 (@fechaDesde <= r.fechaDesde AND @fechaHasta >= r.fechaHasta)))
+
 END
 GO
 -- Estadisticas
@@ -403,7 +413,6 @@ BEGIN
 		ORDER BY 6 DESC
 END
 GO
-
 CREATE PROCEDURE MATOTA.HabitacionesMasOcupadas(@nroTrimestre INT, @year INT) AS
 BEGIN
 	DECLARE	@desde DATE, @hasta DATE;
@@ -456,6 +465,3 @@ BEGIN
 	GROUP BY c.nombre, c.apellido, td.nombre, c.numeroDocumento
 	ORDER BY 'Puntos' DESC
 END
-
-
-DROP PROCEDURE  MATOTA.ClientesConMasPuntos

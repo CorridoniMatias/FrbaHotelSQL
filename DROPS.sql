@@ -18,6 +18,7 @@ DROP PROCEDURE	MATOTA.loginUsuario
 DROP PROCEDURE	MATOTA.EfectivizarReserva
 DROP PROCEDURE	MATOTA.DatosBaseCheckIn
 DROP PROCEDURE	MATOTA.ActualizarReservasVencidas
+DROP PROCEDURE  MATOTA.habilitarHabitacionesDeReservasVencidas
 DROP PROCEDURE	MATOTA.UpdatePassword
 DROP PROCEDURE	MATOTA.altaCliente
 DROP PROCEDURE	MATOTA.UpdateCliente
@@ -33,12 +34,11 @@ DROP PROCEDURE  MATOTA.CrearUsuario
 DROP PROCEDURE  MATOTA.GetHabitacionesReserva
 DROP PROCEDURE  MATOTA.UpdateReserva
 DROP PROCEDURE  MATOTA.QuitarHabitacionesReserva
-DROP PROCEDURE  MATOTA.ListarHabitacionesReserva
 DROP PROCEDURE  MATOTA.CancelarReserva
 DROP PROCEDURE  MATOTA.HabitacionesMasOcupadas
 DROP PROCEDURE  MATOTA.ClientesConMasPuntos
+DROP PROCEDURE  MATOTA.HabitacionesNoReservadas
 -- TYPES
-DROP TYPE  MATOTA.nroHabitaciones
 --TABLES & SCHEMA
 DROP TABLE MATOTA.ItemFactura
 DROP TABLE MATOTA.Factura
