@@ -182,20 +182,18 @@ BEGIN
 	WHERE idHotel = @idHotel AND th.cantidadPersonas >= @cantPersonasReserva AND h.habilitado = 1
 END 
 GO
-
 CREATE FUNCTION MATOTA.PrecioHabitacion(@idHotel int,@nroHabitacion int,@cantPersonas int,@idRegimen int)
 RETURNS NUMERIC(10,2) 
 AS
 BEGIN
 	DECLARE @precio NUMERIC(10,2),@recargaEstrellas numeric(18,0),@porcentajeHabitacion numeric(18,2),@precioBase numeric(18,2);
 	SET @recargaEstrellas = (SELECT TOP 1 recargaEstrellas FROM MATOTA.Hotel WHERE idHotel = @idHotel)
-	SET @porcentajeHabitacion = (SELECT TOP 1 porcentajeExtra FROM MATOTA.TipoHabitacion th JOIN MATOTA.Habitacion h ON (th.idTipoHabitacion = h.idTipoHabitacion) WHERE h.nroHabitacion = @nroHabitacion)
+	SET @porcentajeHabitacion = (SELECT TOP 1 porcentajeExtra FROM MATOTA.TipoHabitacion th JOIN MATOTA.Habitacion h ON (th.idTipoHabitacion = h.idTipoHabitacion) WHERE h.nroHabitacion = @nroHabitacion and h.idHotel = @idHotel)
 	SET @precioBase = (SELECT TOP 1 precioBase FROM MATOTA.Regimen WHERE idRegimen = @idRegimen)
 	SET @precio = (@recargaEstrellas*@porcentajeHabitacion*@cantPersonas) + @precioBase
 	RETURN @precio
 END
 GO
-
 CREATE FUNCTION MATOTA.CantNoches(@fechaInicio datetime,@fechaFin datetime)
 RETURNS INT 
 AS
@@ -237,7 +235,7 @@ CREATE FUNCTION MATOTA.personasHabitacion (@idHotel int , @nroHabitacion int)
 RETURNS INT AS
 BEGIN
 	DECLARE @idTipoHabitacion int
-	SET @idTipoHabitacion = (SELECT idTipoHabitacion FROM MATOTA.Habitacion WHERE nroHabitacion = @nroHabitacion)
+	SET @idTipoHabitacion = (SELECT idTipoHabitacion FROM MATOTA.Habitacion WHERE nroHabitacion = @nroHabitacion and idHotel=@idHotel)
 	RETURN  CASE
 				WHEN @idTipoHabitacion = 1001 THEN 1
 				WHEN @idTipoHabitacion = 1002 THEN 2
@@ -247,7 +245,7 @@ BEGIN
 				END
 END
 GO
-
+drop function MATOTA.personasHabitacion 
 CREATE PROCEDURE MATOTA.AltaReserva(@idHotel int,@fechaReserva datetime,@fechaDesde datetime,@fechaHasta datetime,@cantidadNoches int,@idRegimen int,@idCliente int,@precioBase numeric(18,2),@cantidadPersonas int)
 AS
 BEGIN
