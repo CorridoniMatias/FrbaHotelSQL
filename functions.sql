@@ -347,22 +347,23 @@ BEGIN
 
 	IF @nroTrimestre = 2
 	BEGIN
-		SELECT @desde = 3, @hasta = 6
+		SELECT @desde = 4, @hasta = 6
 	END
 
 	IF @nroTrimestre = 3
 	BEGIN
-		SELECT @desde = 6, @hasta = 9
+		SELECT @desde = 7, @hasta = 9
 	END
 
 	IF @nroTrimestre = 4
 	BEGIN
-		SELECT @desde = 9, @hasta = 12
+		SELECT @desde = 10, @hasta = 12
 	END
 
-	SELECT @fdesde = DATEFROMPARTS(@year, @desde, 1), @fhasta = DATEFROMPARTS(@year, @hasta, 1)
+	SELECT @fdesde = DATEFROMPARTS(@year, @desde, 1), @fhasta = DATEFROMPARTS(@year, @hasta, (CASE  WHEN (@nroTrimestre = 1 OR @nroTrimestre = 4) THEN 31 ELSE 30 END))
 END
 GO
+
 CREATE PROCEDURE MATOTA.HotelesReservasCanceladas(@nroTrimestre INT, @year INT) AS
 BEGIN
 	DECLARE	@desde DATE, @hasta DATE;
@@ -403,5 +404,58 @@ BEGIN
 END
 GO
 
+CREATE PROCEDURE MATOTA.HabitacionesMasOcupadas(@nroTrimestre INT, @year INT) AS
+BEGIN
+	DECLARE	@desde DATE, @hasta DATE;
+	EXEC MATOTA.PeriodoTrimestre @nroTrimestre, @year, @desde OUT, @hasta OUT
+
+	SELECT TOP 5 h.nombre, h.calle, h.nroCalle, h.ciudad, h.pais, rh.nroHabitacion,
+	SUM(
+		CASE 
+			WHEN e.fechaSalida IS NULL THEN e.cantidadNoches
+			ELSE DATEDIFF(DAY, e.fechaIngreso, e.fechaSalida)
+		END
+		) 
+	'Dias Ocupada', 
+	COUNT (*) 'Veces Ocupada' 
+	FROM MATOTA.ReservaHabitacion rh 
+	INNER JOIN MATOTA.Estadia e ON rh.idReserva = e.idReserva
+	INNER JOIN MATOTA.Hotel h ON rh.idHotel = h.idHotel
+	WHERE e.fechaIngreso BETWEEN @desde AND @hasta 
+	AND (CASE
+			WHEN e.fechaSalida IS NULL THEN (e.fechaIngreso + e.cantidadNoches) 
+			ELSE e.fechaSalida 
+		END) BETWEEN @desde AND @hasta
+	GROUP BY h.nombre, h.calle, h.nroCalle, h.ciudad, h.pais, rh.nroHabitacion
+	ORDER BY 7 DESC, 8 DESC
+END
+GO
+
+CREATE PROCEDURE MATOTA.ClientesConMasPuntos (@nroTrimestre INT, @year INT) AS
+BEGIN
+	DECLARE	@desde DATE, @hasta DATE;
+	EXEC MATOTA.PeriodoTrimestre @nroTrimestre, @year, @desde OUT, @hasta OUT
+
+	SELECT TOP 5 c.nombre, c.apellido, td.nombre 'Tipo Documento', c.numeroDocumento, SUM(
+	CAST(itmf.cantidad * itmf.monto 
+	*
+	(
+	CASE
+		WHEN itmf.descripcion = 'Estadia' THEN e.cantidadNoches / 20.0
+		ELSE 1 / 10.0
+	END
+	) 
+	AS INT)) 'Puntos'
+	FROM MATOTA.Cliente c
+	INNER JOIN MATOTA.TipoDocumento td	ON c.idTipoDocumento = td.IdTipoDocumento
+	INNER JOIN MATOTA.Reserva r			ON c.idCliente = r.idCliente
+	INNER JOIN MATOTA.Estadia e			ON r.idReserva = e.idReserva
+	INNER JOIN MATOTA.Factura f			ON e.idEstadia = f.idEstadia
+	INNER JOIN MATOTA.ItemFactura itmf	ON f.idFactura = itmf.idFactura
+	WHERE f.fecha BETWEEN @desde AND @hasta
+	GROUP BY c.nombre, c.apellido, td.nombre, c.numeroDocumento
+	ORDER BY 'Puntos' DESC
+END
 
 
+DROP PROCEDURE  MATOTA.ClientesConMasPuntos
