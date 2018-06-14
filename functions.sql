@@ -315,7 +315,6 @@ BEGIN
 	SELECT nroHabitacion FROM MATOTA.ReservaHabitacion WHERE idReserva = @idReserva
 END
 GO
-
 CREATE PROCEDURE MATOTA.CancelarReserva(@idReserva numeric(18,0),@motivo nvarchar(500),@fecha datetime,@idUsuario int)
 AS
 BEGIN
@@ -323,11 +322,22 @@ BEGIN
 		RETURN 0;
 	ELSE
 	BEGIN
+		DECLARE @estadoReserva int
 		IF (@idUsuario = -1)
+		BEGIN
 			SET @idUsuario = null
-		INSERT INTO MATOTA.ReservaCancelada VALUES(@idReserva,@motivo,@fecha,@idUsuario)
+			SET @estadoReserva = 4
+			INSERT INTO MATOTA.ReservaCancelada VALUES(@idReserva,@motivo,@fecha,@idUsuario)
+		END
+		ELSE
+		BEGIN
+			INSERT INTO MATOTA.ReservaCancelada VALUES(@idReserva,@motivo,@fecha,@idUsuario)
+			SET @estadoReserva = 3
+		END
+		UPDATE MATOTA.Reserva SET idEstadoReserva = @estadoReserva
 		RETURN 1;
 	END
+	
 END
 GO
 
