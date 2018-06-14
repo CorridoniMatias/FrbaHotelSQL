@@ -9,6 +9,7 @@ DROP FUNCTION	MATOTA.CantNoches
 DROP FUNCTION	MATOTA.PrecioHabitacion
 DROP FUNCTION   MATOTA.personasHabitacion
 DROP FUNCTION   MATOTA.CrearContraseña
+DROP FUNCTION   MATOTA.FechaCorrectaParaModificarReserva
 DROP PROCEDURE	MATOTA.HotelesMayorDiasInactivo
 DROP PROCEDURE	MATOTA.HotelesMayorCantConsumibles
 DROP PROCEDURE	MATOTA.PeriodoTrimestre

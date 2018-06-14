@@ -345,6 +345,20 @@ BEGIN
 
 END
 GO
+
+CREATE FUNCTION MATOTA.FechaCorrectaParaModificarReserva(@idReserva int,@fechaSistema datetime)
+RETURNS BIT
+AS
+BEGIN
+	DECLARE @fechaDesde datetime
+	SET @fechaDesde = (SELECT fechaDesde FROM MATOTA.Reserva WHERE idReserva = @idReserva)
+	IF(@fechaDesde - @fechaSistema >=1)
+		RETURN 1;
+	RETURN 0;
+END
+GO
+
+
 -- Estadisticas
 CREATE PROCEDURE MATOTA.PeriodoTrimestre(@nroTrimestre INT, @year INT, @fdesde DATE OUT, @fhasta DATE OUT) AS
 BEGIN
