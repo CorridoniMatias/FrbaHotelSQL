@@ -334,7 +334,7 @@ GO
 CREATE PROCEDURE MATOTA.HabitacionesNoReservadas(@idHotel int,@fechaDesde datetime,@fechaHasta datetime)
 AS
 BEGIN
-		SELECT h.nroHabitacion,th.descripcion,u.descripcion 
+		SELECT h.nroHabitacion,th.descripcion Tipo,u.descripcion Ubicacion
 		FROM MATOTA.Habitacion h JOIN MATOTA.TipoHabitacion th ON (h.idTipoHabitacion = th.idTipoHabitacion) JOIN MATOTA.UbicacionHabitacion u ON (h.idUbicacion = u.idUbicacion)
 		WHERE h.idHotel = @idHotel AND h.nroHabitacion NOT IN 
 									(SELECT distinct h.nroHabitacion FROM MATOTA.Habitacion h,MATOTA.Reserva r,Matota.ReservaHabitacion rh WHERE h.idHotel = @idHotel AND h.nroHabitacion = rh.nroHabitacion
