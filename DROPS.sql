@@ -39,6 +39,7 @@ DROP PROCEDURE  MATOTA.CancelarReserva
 DROP PROCEDURE  MATOTA.HabitacionesMasOcupadas
 DROP PROCEDURE  MATOTA.ClientesConMasPuntos
 DROP PROCEDURE  MATOTA.HabitacionesNoReservadas
+DROP PROCEDURE  MATOTA.ListarHabitacionesReserva
 -- TYPES
 --TABLES & SCHEMA
 DROP TABLE MATOTA.ItemFactura
