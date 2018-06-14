@@ -500,4 +500,6 @@ commit tran migracion
 
 -- Creacion de indices optimizadores de busquedas:
 CREATE INDEX idx_idHotelInInactividad ON MATOTA.InactividadHotel (idHotel)
-CREATE INDEX idx_hotel_habitacion ON Matota.ReservaHabitacion (idHotel, nroHabitacion)
+CREATE INDEX idx_hotel_habitacion ON MATOTA.ReservaHabitacion (idHotel, nroHabitacion)
+CREATE INDEX idx_factura_itemfactura ON MATOTA.ItemFactura (idFactura)
+CREATE INDEX idx_consumibleestadia_itemfactura ON MATOTA.ItemFactura (idConsumibleEstadia)
