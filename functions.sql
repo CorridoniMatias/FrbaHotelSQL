@@ -108,6 +108,7 @@ BEGIN
 	RETURN 1;
 END
 GO
+
 CREATE PROCEDURE MATOTA.CheckRegimenHotelConstraint(@fechaActual DATETIME, @idHotel INT, @idRegimen INT, @reservas INT OUT, @estadias INT OUT) AS
 BEGIN
 	--Cuenta la cant de reservas que hay activas, se considera activa si la fecha desde todavia no paso y no fue cancelada.
@@ -346,7 +347,7 @@ AS
 BEGIN
 		SELECT h.nroHabitacion,th.descripcion Tipo,u.descripcion Ubicacion
 		FROM MATOTA.Habitacion h JOIN MATOTA.TipoHabitacion th ON (h.idTipoHabitacion = th.idTipoHabitacion) JOIN MATOTA.UbicacionHabitacion u ON (h.idUbicacion = u.idUbicacion)
-		WHERE h.idHotel = @idHotel AND h.nroHabitacion NOT IN 
+		WHERE h.idHotel = @idHotel AND h.habilitado = 1 AND h.nroHabitacion NOT IN 
 									(SELECT distinct h.nroHabitacion FROM MATOTA.Habitacion h,MATOTA.Reserva r,Matota.ReservaHabitacion rh WHERE h.idHotel = @idHotel AND h.nroHabitacion = rh.nroHabitacion
 									 AND r.idReserva = rh.idReserva AND(
 									 (@fechaDesde BETWEEN r.fechaDesde AND r.fechaHasta) OR 
