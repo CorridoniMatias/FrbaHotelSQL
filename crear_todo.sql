@@ -122,7 +122,7 @@ CREATE TABLE MATOTA.Rol
 	estado BIT NOT NULL,   
 ); 
 
-INSERT INTO MATOTA.Rol VALUES ('Administrador',1),('Recepcionista',1),('Guest',1)
+INSERT INTO MATOTA.Rol VALUES ('Administrador',1),('Recepcionista',1),('Guest',1),('Administrador General',1)
 
 CREATE TABLE MATOTA.RolesUsuario 
 (
@@ -131,8 +131,8 @@ CREATE TABLE MATOTA.RolesUsuario
 	PRIMARY KEY (idUsuario, idRol)
 );
 
--- Seteamos el usuario admin que viene por defecto como administrador
-INSERT INTO MATOTA.RolesUsuario VALUES (1,1)
+-- Seteamos el usuario admin que viene por defecto como administrador general
+INSERT INTO MATOTA.RolesUsuario VALUES (1,4)
 
 CREATE TABLE MATOTA.Permiso
 (
@@ -164,7 +164,7 @@ CREATE TABLE MATOTA.PermisosRol
 );
 
 INSERT INTO MATOTA.PermisosRol VALUES 
-(1,2),(1,4),(1,5),(1,6),(1,12), (2,3),(2,7),(2,8),(2,9),(2,10),(2,11),(3,7),(3,8)
+(1,2),(1,4),(1,5),(1,6),(1,12), (2,3),(2,7),(2,8),(2,9),(2,10),(2,11),(3,7),(3,8),(4,1),(4,2),(4,3),(4,4),(4,5),(4,6),(4,7),(4,8),(4,9),(4,10),(4,11),(4,12)
 
 CREATE TABLE MATOTA.Cliente
 (
