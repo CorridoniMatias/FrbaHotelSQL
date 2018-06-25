@@ -77,17 +77,25 @@ BEGIN
 	RETURN 1;
 END
 GO
-CREATE PROCEDURE MATOTA.UpdateHabitacion(@idHotel int,@nroHabitacion numeric(18,0),@piso numeric(18,0),
+CREATE PROCEDURE MATOTA.UpdateHabitacion(@idHotel int,@nroHabitacionAnterior numeric(18,0),@nroHabitacion numeric(18,0),@piso numeric(18,0),
 									@idUbicacion int,@idTipoHabitacion numeric(18,0),@descripcion nvarchar(255),
 									@comodidades nvarchar(255),@habilitado bit)
 AS
 BEGIN
-	IF EXISTS (SELECT idHotel,nroHabitacion FROM MATOTA.Habitacion WHERE idHotel = @idHotel AND nroHabitacion = @nroHabitacion)
-		RETURN 0;
-	UPDATE MATOTA.Habitacion SET nroHabitacion = @nroHabitacion, piso = @piso, idUbicacion = @idUbicacion, descripcion = @descripcion,
+	IF (@nroHabitacion = @nroHabitacionAnterior)
+	BEGIN	
+		UPDATE MATOTA.Habitacion SET piso = @piso, idUbicacion = @idUbicacion, descripcion = @descripcion,
 							  comodidades = @comodidades, habilitado = @habilitado
-	WHERE idHotel = @idHotel
-	RETURN 1;
+		WHERE idHotel = @idHotel AND nroHabitacion = @nroHabitacion
+		RETURN 1;
+	END
+	IF EXISTS (SELECT idHotel,nroHabitacion FROM MATOTA.Habitacion WHERE idHotel = @idHotel AND nroHabitacion = @nroHabitacion AND @nroHabitacion != @nroHabitacionAnterior)
+		RETURN 0;
+	IF EXISTS (SELECT r.idReservaHabitacion FROM MATOTA.ReservaHabitacion r JOIN MATOTA.Habitacion h ON h.nroHabitacion = r.nroHabitacion WHERE h.nroHabitacion = @nroHabitacionAnterior)
+		RETURN -1;
+	INSERT INTO MATOTA.Habitacion VALUES (@idHotel,@nroHabitacion,@piso,@idUbicacion,@idTipoHabitacion,@descripcion,@comodidades,@habilitado)
+	DELETE FROM MATOTA.Habitacion WHERE idHotel = @idHotel AND nroHabitacion = @nroHabitacionAnterior
+	RETURN 1
 END
 GO
 
@@ -108,6 +116,7 @@ BEGIN
 	RETURN 1;
 END
 GO
+
 CREATE PROCEDURE MATOTA.CheckRegimenHotelConstraint(@fechaActual DATETIME, @idHotel INT, @idRegimen INT, @reservas INT OUT, @estadias INT OUT) AS
 BEGIN
 	--Cuenta la cant de reservas que hay activas, se considera activa si la fecha desde todavia no paso y no fue cancelada.
@@ -346,7 +355,7 @@ AS
 BEGIN
 		SELECT h.nroHabitacion,th.descripcion Tipo,u.descripcion Ubicacion
 		FROM MATOTA.Habitacion h JOIN MATOTA.TipoHabitacion th ON (h.idTipoHabitacion = th.idTipoHabitacion) JOIN MATOTA.UbicacionHabitacion u ON (h.idUbicacion = u.idUbicacion)
-		WHERE h.idHotel = @idHotel AND h.nroHabitacion NOT IN 
+		WHERE h.idHotel = @idHotel AND h.habilitado = 1 AND h.nroHabitacion NOT IN 
 									(SELECT distinct h.nroHabitacion FROM MATOTA.Habitacion h,MATOTA.Reserva r,Matota.ReservaHabitacion rh WHERE h.idHotel = @idHotel AND h.nroHabitacion = rh.nroHabitacion
 									 AND r.idReserva = rh.idReserva AND(
 									 (@fechaDesde BETWEEN r.fechaDesde AND r.fechaHasta) OR 
