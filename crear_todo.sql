@@ -496,6 +496,8 @@ LEFT JOIN MATOTA.ReservaHabitacion rh ON (rh.idHotel = h.idHotel AND rh.idReserv
 LEFT JOIN MATOTA.ConsumiblesEstadia ce ON (ce.idReservaHabitacion = rh.idReservaHabitacion AND ce.cantidad = Item_Factura_Cantidad AND ce.codigoConsumible = Consumible_Codigo AND ce.precioAlMomento = Item_Factura_Monto)
 WHERE Factura_Nro IS NOT NULL 
 
+--Vincular al usuario administrador con todos los hoteles.
+INSERT INTO MATOTA.HotelesUsuario select 1,idHotel FROM MATOTA.Hotel
 commit tran migracion
 
 -- Creacion de indices optimizadores de busquedas:
