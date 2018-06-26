@@ -407,6 +407,19 @@ BEGIN
 END
 GO
 
+CREATE FUNCTION MATOTA.HotelHabilitadoParaFechasReserva(@idHotel int,@fechainicioReserva datetime,@fechafinReserva datetime)
+RETURNS BIT
+AS
+BEGIN
+	IF EXISTS (SELECT 1 FROM MATOTA.InactividadHotel 
+			   WHERE idHotel = @idHotel AND (
+			   (@fechainicioReserva BETWEEN fechaInicio AND fechaFin) OR 
+			   (@fechafinReserva BETWEEN fechaInicio AND fechaFin) OR
+			   (@fechainicioReserva <= fechaInicio AND @fechafinReserva >= fechaFin)))
+		RETURN 1;
+	RETURN 0;
+END
+GO 
 
 -- Estadisticas
 CREATE PROCEDURE MATOTA.PeriodoTrimestre(@nroTrimestre INT, @year INT, @fdesde DATE OUT, @fhasta DATE OUT) AS
@@ -528,3 +541,6 @@ BEGIN
 	GROUP BY c.nombre, c.apellido, td.nombre, c.numeroDocumento
 	ORDER BY 'Puntos' DESC
 END
+
+
+
