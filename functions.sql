@@ -199,16 +199,19 @@ BEGIN
 	IF @inhabilitadoHasta IS NOT NULL
 		RETURN -1; -- El hotel está inhabilitado en la fecha del sistema.
 
-	DECLARE @idHotelReserva INT;
-	SET @idHotelReserva = NULL;
+	DECLARE @idHotelReserva INT, @idEstadia INT;
+	SELECT @idHotelReserva = NULL, @idEstadia = NULL;
 
-	SELECT @fechaInicio = r.fechaDesde, @idHotelReserva = h.idHotel, @hotelReserva = h.nombre + '(ID: '+ CAST(h.idHotel AS varchar) + ')' FROM MATOTA.Reserva r
+	SELECT @fechaInicio = r.fechaDesde, @idHotelReserva = h.idHotel, @hotelReserva = h.nombre + '(ID: '+ CAST(h.idHotel AS varchar) + ')', @idEstadia = e.idEstadia FROM MATOTA.Reserva r
 	INNER JOIN MATOTA.Hotel h ON r.idHotel = h.idHotel
 	LEFT JOIN MATOTA.Estadia e ON r.idReserva = e.idReserva
 	WHERE r.idReserva = @idReserva
 
 	IF @fechaInicio IS NULL AND @idHotelReserva IS NULL
 		RETURN -2; -- La reserva no fue encontrada.
+
+	IF @idEstadia IS NOT NULL
+		RETURN -5; -- La reserva ya fue efectivizada.
 
 	IF @fechaInicio != @fechaSistema
 		RETURN -3; -- La reserva no es para esta fecha.

@@ -118,11 +118,11 @@ descripcion NVARCHAR(255),
 CREATE TABLE MATOTA.Rol
 (
 	idRol INT NOT NULL PRIMARY KEY IDENTITY(1,1),
-	NOMBRE NVARCHAR(20) NOT NULL,
+	NOMBRE NVARCHAR(30) NOT NULL,
 estado BIT NOT NULL,   
 ); 
 
-INSERT INTO MATOTA.Rol VALUES ('Administrador',1),('Recepcionista',1),('Guest',1)
+INSERT INTO MATOTA.Rol VALUES ('Administrador',1),('Recepcionista',1),('Guest',1),('Administrador General',1)
 
 CREATE TABLE MATOTA.RolesUsuario 
 (
@@ -164,7 +164,7 @@ CREATE TABLE MATOTA.PermisosRol
 );
 
 INSERT INTO MATOTA.PermisosRol VALUES 
-(1,2),(1,4),(1,5),(1,6),(1,12), (2,3),(2,7),(2,8),(2,9),(2,10),(2,11),(3,7),(3,8)
+(1,2),(1,4),(1,5),(1,6),(1,12), (2,3),(2,7),(2,8),(2,9),(2,10),(2,11),(3,7),(3,8),(4,1),(4,2),(4,3),(4,4),(4,5),(4,6),(4,7),(4,8),(4,9),(4,10),(4,11),(4,12)
 
 CREATE TABLE MATOTA.Cliente
 (
