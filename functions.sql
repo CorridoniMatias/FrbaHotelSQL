@@ -117,6 +117,25 @@ BEGIN
 END
 GO
 
+CREATE PROCEDURE MATOTA.altaFactura(@idEstadia int,@fecha datetime, @idFormaDePago int,@total numeric(18,2))
+AS
+BEGIN
+	IF EXISTS(SELECT f.idFactura FROM MATOTA.Factura f INNER JOIN MATOTA.Estadia e ON (f.idEstadia = e.idEstadia) WHERE e.idEstadia = @idEstadia)
+		RETURN -1;
+	INSERT INTO MATOTA.Factura VALUES (@idEstadia,@fecha,@idFormaDePago,@total,0)
+	RETURN SCOPE_IDENTITY();
+END
+GO
+
+CREATE PROCEDURE MATOTA.altaItemFactura(@idFactura numeric(18,0),@idConsumibleEstadia int, @descripcion varchar(255),
+									@cantidad numeric(18,0),@monto numeric(18,2))
+AS
+BEGIN
+	INSERT INTO MATOTA.ItemFactura VALUES (@idFactura,@idConsumibleEstadia,@descripcion,@cantidad,@monto)
+	RETURN SCOPE_IDENTITY();
+END
+GO
+
 CREATE PROCEDURE MATOTA.CheckRegimenHotelConstraint(@fechaActual DATETIME, @idHotel INT, @idRegimen INT, @reservas INT OUT, @estadias INT OUT) AS
 BEGIN
 	--Cuenta la cant de reservas que hay activas, se considera activa si la fecha desde todavia no paso y no fue cancelada.
