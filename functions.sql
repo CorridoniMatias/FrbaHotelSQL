@@ -406,7 +406,7 @@ BEGIN
 		FROM MATOTA.Habitacion h JOIN MATOTA.TipoHabitacion th ON (h.idTipoHabitacion = th.idTipoHabitacion) JOIN MATOTA.UbicacionHabitacion u ON (h.idUbicacion = u.idUbicacion)
 		WHERE h.idHotel = @idHotel AND h.habilitado = 1 AND h.nroHabitacion NOT IN 
 									(SELECT distinct h.nroHabitacion FROM MATOTA.Habitacion h,MATOTA.Reserva r,Matota.ReservaHabitacion rh WHERE h.idHotel = @idHotel AND h.nroHabitacion = rh.nroHabitacion
-									 AND r.idReserva = rh.idReserva AND(
+									 AND r.idReserva = rh.idReserva AND NOT EXISTS (SELECT 1 FROM matota.ReservaCancelada WHERE idReserva = r.idReserva) AND(
 									 (@fechaDesde BETWEEN r.fechaDesde AND r.fechaHasta) OR 
 									 (@fechaHasta BETWEEN r.fechaDesde AND r.fechaHasta) OR
 									 (@fechaDesde <= r.fechaDesde AND @fechaHasta >= r.fechaHasta)))
@@ -560,6 +560,4 @@ BEGIN
 	GROUP BY c.nombre, c.apellido, td.nombre, c.numeroDocumento
 	ORDER BY 'Puntos' DESC
 END
-
-
 
