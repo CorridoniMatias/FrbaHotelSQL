@@ -126,11 +126,13 @@ BEGIN
 	RETURN SCOPE_IDENTITY();
 END
 GO
-
 CREATE PROCEDURE MATOTA.altaItemFactura(@idFactura numeric(18,0),@idConsumibleEstadia int, @descripcion varchar(255),
 									@cantidad numeric(18,0),@monto numeric(18,2))
 AS
 BEGIN
+	IF @idConsumibleEstadia = -1 
+		SET @idConsumibleEstadia = NULL
+
 	INSERT INTO MATOTA.ItemFactura VALUES (@idFactura,@idConsumibleEstadia,@descripcion,@cantidad,@monto)
 	RETURN SCOPE_IDENTITY();
 END
@@ -294,11 +296,19 @@ END
 GO
 CREATE PROCEDURE MATOTA.GetEstadiaForHabitacion(@nroHabitacion NUMERIC(18,0), @idHotel INT, @fechaSistema DATETIME, @idEstadia INT OUT, @idReservaHabitacion INT OUT) AS
 BEGIN
-	SELECT TOP 1 @idEstadia = e.idEstadia, @idReservaHabitacion = re.idReservaHabitacion FROM MATOTA.ReservaHabitacion re
+	DECLARE @fact INT;
+
+	SELECT TOP 1 @idEstadia = e.idEstadia, @idReservaHabitacion = re.idReservaHabitacion, @fact = idFactura FROM MATOTA.ReservaHabitacion re
 		INNER JOIN MATOTA.Reserva r ON re.idReserva = r.idReserva 
-		INNER JOIN MATOTA.Estadia e ON e.idReserva = r.idReserva 
+		INNER JOIN MATOTA.Estadia e ON e.idReserva = r.idReserva
+		LEFT JOIN MATOTA.Factura fa ON fa.idEstadia = e.idEstadia 
 	WHERE re.nroHabitacion = @nroHabitacion AND re.idHotel = @idHotel AND e.fechaSalida IS NULL AND  e.fechaIngreso <= @fechaSistema
 	ORDER BY e.fechaIngreso DESC
+
+	IF @fact IS NOT NULL 
+		RETURN -1
+		
+	RETURN 0
 END
 GO
 CREATE FUNCTION MATOTA.personasHabitacion (@idHotel int , @nroHabitacion int)
