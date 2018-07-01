@@ -176,7 +176,8 @@ BEGIN
 	SELECT @estadias = COUNT(e.idEstadia) FROM MATOTA.Reserva re
 	INNER JOIN MATOTA.EstadoReserva er ON (re.idEstadoReserva = er.idEstadoReserva)
 	INNER JOIN MATOTA.Estadia e ON (e.idReserva = re.idReserva AND (e.fechaIngreso <= @fechaHasta AND e.fechaSalida IS NULL))
-	WHERE re.idHotel = @idHotel AND er.descripcion LIKE '%efectivizada%'
+	LEFT JOIN MATOTA.Factura fa ON fa.idEstadia = e.idEstadia
+	WHERE re.idHotel = @idHotel AND er.descripcion LIKE '%efectivizada%' AND fa.idFactura IS NULL
 
 	EXEC @inactividades = MATOTA.GetInactividadesEnPeriodo @fechaDesde, @fechaHasta, @idHotel;
 END
