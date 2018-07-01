@@ -420,11 +420,12 @@ BEGIN
 		SELECT h.nroHabitacion,th.descripcion Tipo,u.descripcion Ubicacion
 		FROM MATOTA.Habitacion h JOIN MATOTA.TipoHabitacion th ON (h.idTipoHabitacion = th.idTipoHabitacion) JOIN MATOTA.UbicacionHabitacion u ON (h.idUbicacion = u.idUbicacion)
 		WHERE h.idHotel = @idHotel AND h.habilitado = 1 AND h.nroHabitacion NOT IN 
-									(SELECT distinct h.nroHabitacion FROM MATOTA.Habitacion h,MATOTA.Reserva r,Matota.ReservaHabitacion rh WHERE h.idHotel = @idHotel AND h.nroHabitacion = rh.nroHabitacion
+									(SELECT distinct h.nroHabitacion FROM MATOTA.Habitacion h,MATOTA.Reserva r,Matota.ReservaHabitacion rh 
+									WHERE h.idHotel = @idHotel AND h.nroHabitacion = rh.nroHabitacion
 									 AND r.idReserva = rh.idReserva AND NOT EXISTS (SELECT 1 FROM matota.ReservaCancelada WHERE idReserva = r.idReserva) AND(
-									 (@fechaDesde BETWEEN r.fechaDesde AND r.fechaHasta) OR 
-									 (@fechaHasta BETWEEN r.fechaDesde AND r.fechaHasta) OR
-									 (@fechaDesde <= r.fechaDesde AND @fechaHasta >= r.fechaHasta)))
+									 (@fechaDesde BETWEEN r.fechaDesde AND COALESCE(r.fechaHasta,DATEADD(day,r.cantidadNoches,r.fechaDesde))) OR 
+									 (@fechaHasta BETWEEN r.fechaDesde AND COALESCE(r.fechaHasta,DATEADD(day,r.cantidadNoches,r.fechaDesde))) OR
+									 (@fechaDesde <= r.fechaDesde AND @fechaHasta >= COALESCE(r.fechaHasta,DATEADD(day,r.cantidadNoches,r.fechaDesde)))))
 
 END
 GO
