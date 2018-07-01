@@ -200,6 +200,7 @@ estado BIT NOT NULL
 CREATE TABLE MATOTA.RegimenHotel(
 idHotel		INT NOT NULL REFERENCES MATOTA.Hotel,
 idRegimen	INT NOT NULL REFERENCES MATOTA.Regimen,
+habilitado	BIT NOT NULL DEFAULT 1
 PRIMARY KEY(idHotel, idRegimen)
 ); 
 
